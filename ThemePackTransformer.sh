@@ -45,10 +45,10 @@ generate_slideshow_xml() {
   echo "<!-- This animation starts at midnight of $Yer/$Mnth/$Day.  -->"
 
   # find all image files
-  find -L $content_folder/$theme_name \
-       -regextype posix-extended \
-       -iregex ".*\.($file_type)" \
-       | sort > $theme_folder/image_list
+  image_list=$( find -L $content_folder/$theme_name \
+                     -regextype posix-extended \
+                     -iregex ".*\.($file_type)" \
+                     | sort )
 
   # count files and calculate interval
   # 10min to change a picture
@@ -62,12 +62,12 @@ generate_slideshow_xml() {
   to_head="    <to>"
   to_tail="</to>\n  </transition>"
 
-  image_count=$( cat $theme_folder/image_list | wc -l)
-  first_image=$( cat $theme_folder/image_list | head -n 1)
+  image_count=$( echo "$image_list" | wc -l)
+  first_image=$( echo "$image_list" | head -n 1)
   for (( i = 0; i < $image_count; i++ )); do
     #statements
-    static_image=$( cat $theme_folder/image_list | sed -n `expr $i + 1`p )
-    to_image=$( cat $theme_folder/image_list | sed -n `expr $i + 2`p )
+    static_image=$( echo "$image_list" | sed -n `expr $i + 1`p )
+    to_image=$( echo "$image_list" | sed -n `expr $i + 2`p )
     if [[ $i -eq `expr $image_count - 1` ]]; then
       to_image=$first_image
     fi
@@ -82,7 +82,6 @@ generate_slideshow_xml() {
     echo "  </transition>"
   done
   echo "</background>"
-  rm $theme_folder/image_list
 }
 
 generate_properties_xml() {
