@@ -12,6 +12,9 @@ readonly content_folder=$HOME/.local/share/backgrounds # store all theme content
 theme_name=
 theme_folder=
 slideshow_xml=
+# set default time interval
+static_time=595
+transition_time=5
 
 set_file_path() {
   theme_file=$1
@@ -51,10 +54,6 @@ generate_slideshow_xml() {
                      | sort )
 
   # count files and calculate interval
-  # 10min to change a picture
-  # this means 595s + 5s
-  static_time=595.0
-  transition_time=5.0
   static_head="  <static>\n    <duration>$static_time</duration>\n    <file>"
   static_tail="</file>\n  </static>"
   from_head="  <transition>\n    <duration>$transition_time</duration>\n    <from>"
@@ -85,7 +84,6 @@ generate_slideshow_xml() {
 }
 
 generate_properties_xml() {
-  # TODO: write the properties xml
   echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
   echo "<!DOCTYPE wallpapers SYSTEM \"gnome-wp-list.dtd\">"
   echo "<wallpapers>"
@@ -98,9 +96,24 @@ generate_properties_xml() {
   echo "</wallpapers>"
 }
 
+
 # main
+
 mkdir -p $properties_folder
-date=`date +%Y-%m-%d`
 set_file_path $1
+shift
+
+# get options
+while getopts :t: optname; do
+  #statements
+  case $optname in
+    "t")
+      static_time=`expr $OPTARG - $transition_time`;;
+    "?")
+      echo "wrong parameter";;
+  esac
+done
+
+date=`date +%Y-%m-%d`
 generate_slideshow_xml $date > $slideshow_xml
 generate_properties_xml > $properties_folder/$theme_name-wallpapers.xml
